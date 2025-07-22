@@ -270,7 +270,7 @@
                     updateLoading();
                 }, step.duration);
             } else {
-                setTimeout(initializeEnhancedGame, 300);
+                setTimeout(initializeGame, 300);
             }
         }
         
@@ -1398,10 +1398,6 @@
                 // Initialize basic game first
                 await initializeGame();
                 
-                // Initialize country borders
-                countryBorders = new CountryBordersSystem(viewer);
-                await countryBorders.initialize();
-                
                 // Initialize advanced globe features
                 advancedGlobe = new AdvancedGlobeEnrichment(viewer);
                 await advancedGlobe.initialize();
@@ -1409,7 +1405,7 @@
                 // Add control panel for toggling features
                 createAdvancedControlPanel();
                 
-                console.log('🌍 Enhanced Globe with Country Borders Ready!');
+                console.log('🌍 Enhanced Globe Experience Ready!');
                 
             } catch (error) {
                 console.error('Enhanced initialization failed:', error);
@@ -1422,7 +1418,7 @@
         function createAdvancedControlPanel() {
             const controlPanel = document.createElement('div');
             controlPanel.style.cssText = `
-                position: absolute; top: 100px; right: 20px; width: 280px;
+                position: absolute; top: 100px; right: 20px; width: 250px;
                 background: rgba(0,0,0,0.8); color: white; padding: 15px;
                 border-radius: 10px; font-family: 'SF Pro Text', sans-serif;
                 border: 1px solid #00ff88; box-shadow: 0 0 20px rgba(0,255,136,0.3);
@@ -1430,12 +1426,6 @@
             
             controlPanel.innerHTML = `
                 <h3 style="margin: 0 0 15px 0; color: #00ff88;">🌍 Globe Controls</h3>
-                <div style="margin-bottom: 10px;">
-                    <label style="display: flex; align-items: center; gap: 8px;">
-                        <input type="checkbox" id="borders-toggle" checked>
-                        <span>🗺️ Country Borders</span>
-                    </label>
-                </div>
                 <div style="margin-bottom: 10px;">
                     <label style="display: flex; align-items: center; gap: 8px;">
                         <input type="checkbox" id="weather-toggle" checked>
@@ -1460,23 +1450,14 @@
                         <span>🚀 Performance Mode</span>
                     </label>
                 </div>
-                <button id="reset-view" style="width: 100%; padding: 8px; background: #00ff88; border: none; border-radius: 5px; color: black; font-weight: bold; margin-bottom: 8px;">
+                <button id="reset-view" style="width: 100%; padding: 8px; background: #00ff88; border: none; border-radius: 5px; color: black; font-weight: bold;">
                     🏠 Reset View
-                </button>
-                <button id="show-alliances" style="width: 100%; padding: 8px; background: #4444ff; border: none; border-radius: 5px; color: white; font-weight: bold;">
-                    🛡️ Show Alliances
                 </button>
             `;
             
             document.body.appendChild(controlPanel);
             
             // Event listeners
-            document.getElementById('borders-toggle').addEventListener('change', (e) => {
-                if (countryBorders && countryBorders.countryBorders) {
-                    countryBorders.countryBorders.show = e.target.checked;
-                }
-            });
-            
             document.getElementById('weather-toggle').addEventListener('change', (e) => {
                 if (advancedGlobe) advancedGlobe.toggleWeatherEffects(e.target.checked);
             });
@@ -1503,22 +1484,6 @@
                     }
                 });
             });
-            
-            document.getElementById('show-alliances').addEventListener('click', () => {
-                if (countryBorders) {
-                    // Show current alliances
-                    countryBorders.showAllianceFormation('NATO', 
-                        ['United States', 'United Kingdom', 'France', 'Germany'], 
-                        countryBorders.allianceColors.nato
-                    );
-                    countryBorders.showAllianceFormation('Pacific Alliance', 
-                        ['Japan', 'South Korea', 'Australia'], 
-                        countryBorders.allianceColors.pacific
-                    );
-                    countryBorders.highlightCountry('China', 'hostile', 0.4);
-                    countryBorders.highlightCountry('Russia', 'hostile', 0.4);
-                }
-            });
         }
         
         // Update the main initialization to use enhanced version
@@ -1527,6 +1492,7 @@
                 console.log('🚀 Initializing Enhanced Coalitions Globe...');
                 
                 // Load token from .env or use fallback
+                // NOTE: Get a free token from https://cesium.com/ion/tokens
                 const token = import.meta.env?.VITE_CESIUM_TOKEN || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMTk3NGQ0YS1jOTgzLTRmMTItODE1ZC04NTU2M2ZhYmExNTAiLCJpZCI6MzIxNzgxLCJpYXQiOjE3NTI2MDQ2ODh9.hcAL5ZNXEpcJTz6OwmNWEcl2ZG1A8afrhHifi80uO4I';
                 
                 console.log('🔑 Using Cesium token:', token.substring(0, 20) + '...');
@@ -1637,11 +1603,8 @@
                         }
                     }, 3000);
                 } else {
-                    // Initialize enhanced globe features after basic initialization
-                    setTimeout(() => {
-                        // Don't call initializeEnhancedGame again - just initialize the enhanced features
-                        initializeEnhancedFeatures();
-                    }, 2000);
+                    // Initialize enhanced globe features
+                    setTimeout(() => initializeEnhancedGame(), 2000);
                 }
                 
                 console.log('🎮 Game initialized successfully');
@@ -1654,29 +1617,6 @@
                     loadingText.textContent = 'Failed to load. Please refresh the page.';
                     loadingText.style.color = '#ff4444';
                 }
-            }
-        }
-        
-        // Separate function for initializing enhanced features (no recursion)
-        async function initializeEnhancedFeatures() {
-            try {
-                console.log('🌍 Initializing enhanced features...');
-                
-                // Initialize country borders
-                countryBorders = new CountryBordersSystem(viewer);
-                await countryBorders.initialize();
-                
-                // Initialize advanced globe features
-                advancedGlobe = new AdvancedGlobeEnrichment(viewer);
-                await advancedGlobe.initialize();
-                
-                // Add control panel for toggling features
-                createAdvancedControlPanel();
-                
-                console.log('✅ Enhanced features ready!');
-                
-            } catch (error) {
-                console.error('Enhanced features initialization failed:', error);
             }
         }
         
@@ -2436,7 +2376,7 @@
                     // Validate origin coordinates
                     const originCoords = this.validateCoordinates(origin[0], origin[1]);
                     
-                    const attackVector = this.createSafeEntity({
+                    const attackVector = this.viewer.entities.add({
                         polyline: {
                             positions: Cesium.Cartesian3.fromDegreesArrayHeights([
                                 originCoords.lon, originCoords.lat, 20000,
@@ -2457,7 +2397,7 @@
                 const coords = this.validateCoordinates(position[0] + 0.1, position[1] + 0.1);
                 
                 // Refugee camp visualization
-                const camp = this.createSafeEntity({
+                const camp = this.viewer.entities.add({
                     position: Cesium.Cartesian3.fromDegrees(coords.lon, coords.lat, 0),
                     ellipse: {
                         semiMinorAxis: 15000,
@@ -2486,7 +2426,7 @@
                 const targetCoords = this.validateCoordinates(targetPos[0], targetPos[1]);
                 
                 // Missile trajectory to satellite
-                const asatMissile = this.createSafeEntity({
+                const asatMissile = this.viewer.entities.add({
                     polyline: {
                         positions: Cesium.Cartesian3.fromDegreesArrayHeights([
                             launchCoords.lon, launchCoords.lat, launchSite[2],
@@ -2509,11 +2449,12 @@
                 }, 2000);
             }
             
+            // Add coordinate validation to all other functions that use coordinates
             createPulsingEffect(position, color) {
                 // Validate coordinates
                 const coords = this.validateCoordinates(position[0], position[1]);
                 
-                const pulseEffect = this.createSafeEntity({
+                const pulseEffect = this.viewer.entities.add({
                     position: Cesium.Cartesian3.fromDegrees(coords.lon, coords.lat, 2000),
                     ellipse: {
                         semiMinorAxis: 50000,
@@ -2534,6 +2475,429 @@
                     this.viewer.entities.remove(pulseEffect);
                 }, 5000);
             }
+            
+            // HOUR 12: Economic Warfare & Cyber Attacks
+            hourTwelve() {
+                console.log('🎬 HOUR 12: Economic Warfare & Cyber Attacks');
+                this.showVoiceover("HOUR 12: When economics becomes warfare...", 6000);
+                
+                // Show global financial centers
+                this.smoothCameraMove(
+                    Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 2000000), // NYC
+                    4,
+                    () => {
+                        // Financial warfare cascade
+                        const financialAttacks = [
+                            { pos: [-74.006, 40.7128], event: "NYSE circuit breakers triggered", type: "market" },
+                            { pos: [-0.1276, 51.5074], event: "London: £ crashes to historic low", type: "currency" },
+                            { pos: [139.6917, 35.6895], event: "Tokyo: Bank runs begin", type: "banking" },
+                            { pos: [8.6821, 50.1109], event: "Frankfurt: ECB emergency meeting", type: "central_bank" },
+                            { pos: [121.4737, 31.2304], event: "Shanghai: Capital controls imposed", type: "controls" }
+                        ];
+                        
+                        financialAttacks.forEach((attack, i) => {
+                            setTimeout(() => {
+                                this.showAlert(attack.event, "danger");
+                                this.createFinancialCrisis(attack.pos, attack.type);
+                                
+                                // Cyber attack visualization
+                                if (i === 2) { // During Tokyo crisis
+                                    this.createCyberAttackWave();
+                                }
+                            }, i * 2000);
+                        });
+                        
+                        setTimeout(() => this.hourTwentyFour(), 12000);
+                    }
+                );
+            }
+            
+            createCyberAttackWave() {
+                // Cyber attack spreading across continents
+                const cyberTargets = [
+                    { pos: [-77.0369, 38.9072], name: "Pentagon systems compromised" },
+                    { pos: [-0.1276, 51.5074], name: "London: Power grid fluctuations" },
+                    { pos: [2.3522, 48.8566], name: "Paris: Metro system disrupted" },
+                    { pos: [13.4050, 52.5200], name: "Berlin: Government networks down" },
+                    { pos: [37.6176, 55.7558], name: "Moscow: Counter-cyber operations" }
+                ];
+                
+                cyberTargets.forEach((target, i) => {
+                    setTimeout(() => {
+                        this.showAlert(`CYBER: ${target.name}`, "danger");
+                        
+                        // Create cyber attack visualization
+                        const cyberEffect = this.viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(target.pos[0], target.pos[1], 5000),
+                            ellipse: {
+                                semiMinorAxis: 50000,
+                                semiMajorAxis: 50000,
+                                material: new Cesium.ColorMaterialProperty(
+                                    new Cesium.CallbackProperty(() => {
+                                        const time = Date.now() / 1000;
+                                        const alpha = 0.6 + Math.sin(time * 8) * 0.4;
+                                        return Cesium.Color.MAGENTA.withAlpha(alpha);
+                                    }, false)
+                                )
+                            }
+                        });
+                        
+                        // Create data stream lines showing attack vectors
+                        this.createDataStreamAttack(target.pos);
+                    }, i * 1000);
+                });
+            }
+            
+            // HOUR 24: Alliance Fractures & Refugee Crisis
+            hourTwentyFour() {
+                console.log('🎬 HOUR 24: Alliance Fractures & Refugee Crisis');
+                this.showVoiceover("HOUR 24: When allies become adversaries...", 6000);
+                
+                // Show alliance breakdown
+                this.smoothCameraMove(
+                    Cesium.Cartesian3.fromDegrees(10, 50, 6000000), // Europe
+                    5,
+                    () => {
+                        // Alliance fractures
+                        this.showAllianceFractures();
+                        
+                        // Refugee flows
+                        setTimeout(() => {
+                            this.createRefugeeCrisis();
+                        }, 3000);
+                        
+                        // Resource wars
+                        setTimeout(() => {
+                            this.createResourceWars();
+                        }, 6000);
+                        
+                        setTimeout(() => this.hourFortyEight(), 12000);
+                    }
+                );
+            }
+            
+            showAllianceFractures() {
+                // NATO fractures
+                const allianceCrises = [
+                    { event: "Germany suspends NATO Article 5 compliance", pos: [13.4050, 52.5200] },
+                    { event: "Turkey closes Bosphorus to US ships", pos: [28.9784, 41.0082] },
+                    { event: "Hungary aligns with China on sanctions", pos: [19.0402, 47.4979] },
+                    { event: "Philippines revokes US base agreements", pos: [121.7740, 12.8797] },
+                    { event: "Saudi Arabia accepts yuan for oil", pos: [46.6753, 24.7136] }
+                ];
+                
+                allianceCrises.forEach((crisis, i) => {
+                    setTimeout(() => {
+                        this.showAlert(crisis.event, "danger");
+                        
+                        // Show alliance break visualization
+                        const breakPoint = this.viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(crisis.pos[0], crisis.pos[1], 0),
+                            ellipse: {
+                                semiMinorAxis: 80000,
+                                semiMajorAxis: 80000,
+                                material: Cesium.Color.YELLOW.withAlpha(0.6),
+                                outline: true,
+                                outlineColor: Cesium.Color.ORANGE
+                            }
+                        });
+                    }, i * 1500);
+                });
+            }
+            
+            createRefugeeCrisis() {
+                // Refugee movement flows
+                const refugeeFlows = [
+                    { 
+                        from: [121.5654, 25.0330], // Taiwan
+                        to: [121.7740, 12.8797],   // Philippines
+                        count: "2.3M refugees"
+                    },
+                    {
+                        from: [126.9780, 37.5665], // South Korea
+                        to: [139.6917, 35.6895],   // Japan
+                        count: "800K evacuees"
+                    },
+                    {
+                        from: [139.6917, 35.6895], // Japan
+                        to: [-122.4194, 37.7749],  // USA West Coast
+                        count: "1.1M displaced"
+                    }
+                ];
+                
+                refugeeFlows.forEach((flow, i) => {
+                    setTimeout(() => {
+                        this.showAlert(`Refugee Crisis: ${flow.count} fleeing conflict zones`, "danger");
+                        
+                        // Create refugee flow visualization
+                        const refugeePath = this.viewer.entities.add({
+                            polyline: {
+                                positions: Cesium.Cartesian3.fromDegreesArray([
+                                    flow.from[0], flow.from[1],
+                                    flow.to[0], flow.to[1]
+                                ]),
+                                width: 8,
+                                material: new Cesium.PolylineGlowMaterialProperty({
+                                    glowPower: 0.2,
+                                    color: Cesium.Color.ORANGE.withAlpha(0.7)
+                                }),
+                                clampToGround: false,
+                                height: 5000
+                            }
+                        });
+                        
+                        // Animated refugee camps
+                        this.createRefugeeCamp(flow.to);
+                    }, i * 2000);
+                });
+            }
+            
+            createResourceWars() {
+                // Critical resource conflicts
+                const resourceConflicts = [
+                    { pos: [-109.0428, 37.2431], resource: "Rare Earth Mines - Utah", type: "mining" },
+                    { pos: [31.2357, 30.0444], resource: "Suez Canal - Blocked", type: "chokepoint" },
+                    { pos: [56.2833, 25.2048], resource: "Strait of Hormuz - Mined", type: "energy" },
+                    { pos: [103.8198, 1.3521], resource: "Malacca Strait - Contested", type: "shipping" }
+                ];
+                
+                resourceConflicts.forEach((conflict, i) => {
+                    setTimeout(() => {
+                        this.showAlert(`Resource War: ${conflict.resource}`, "danger");
+                        
+                        const resourceMarker = this.viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(conflict.pos[0], conflict.pos[1], 1000),
+                            ellipse: {
+                                semiMinorAxis: 30000,
+                                semiMajorAxis: 30000,
+                                material: Cesium.Color.PURPLE.withAlpha(0.7),
+                                outline: true,
+                                outlineColor: Cesium.Color.WHITE
+                            }
+                        });
+                        
+                        // Add conflict explosion effect
+                        this.createExplosion(
+                            Cesium.Cartesian3.fromDegrees(conflict.pos[0], conflict.pos[1], 0), 
+                            1.2
+                        );
+                    }, i * 1500);
+                });
+            }
+            
+            // HOUR 48: Climate Multiplier & Space War
+            hourFortyEight() {
+                console.log('🎬 HOUR 48: Climate Multiplier & Space War');
+                this.showVoiceover("HOUR 48: When Earth's systems fail, the war moves to space...", 7000);
+                
+                // Pull back to show climate effects
+                this.smoothCameraMove(
+                    Cesium.Cartesian3.fromDegrees(0, 0, 15000000),
+                    6,
+                    () => {
+                        // Climate warfare
+                        this.createClimateWarfare();
+                        
+                        // Space militarization
+                        setTimeout(() => {
+                            this.createSpaceWarfare();
+                        }, 4000);
+                        
+                        // Final cascade
+                        setTimeout(() => this.hourSeventyTwo(), 10000);
+                    }
+                );
+            }
+            
+            createClimateWarfare() {
+                // Climate-induced conflicts
+                const climateEvents = [
+                    { pos: [77.1025, 28.7041], event: "Delhi: Water riots, 50°C heat", effect: "drought" },
+                    { pos: [-89.4012, 13.7942], event: "Central America: Climate migration surge", effect: "migration" },
+                    { pos: [2.3522, 48.8566], event: "Europe: Power grid fails in heatwave", effect: "infrastructure" },
+                    { pos: [144.9631, -37.8136], event: "Australia: Bushfires threaten cities", effect: "disaster" }
+                ];
+                
+                climateEvents.forEach((event, i) => {
+                    setTimeout(() => {
+                        this.showAlert(`CLIMATE: ${event.event}`, "danger");
+                        
+                        // Climate effect visualization
+                        const climateEffect = this.viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(event.pos[0], event.pos[1], 0),
+                            ellipse: {
+                                semiMinorAxis: 200000,
+                                semiMajorAxis: 300000,
+                                material: new Cesium.ColorMaterialProperty(
+                                    new Cesium.CallbackProperty(() => {
+                                        const time = Date.now() / 1000;
+                                        const alpha = 0.3 + Math.sin(time * 2) * 0.2;
+                                        return event.effect === 'drought' ? Cesium.Color.RED.withAlpha(alpha) :
+                                               event.effect === 'migration' ? Cesium.Color.ORANGE.withAlpha(alpha) :
+                                               event.effect === 'infrastructure' ? Cesium.Color.PURPLE.withAlpha(alpha) :
+                                               Cesium.Color.YELLOW.withAlpha(alpha);
+                                    }, false)
+                                )
+                            }
+                        });
+                    }, i * 1500);
+                });
+            }
+            
+            createSpaceWarfare() {
+                // Satellite warfare
+                const spaceAssets = [
+                    { pos: [0, 0, 35786000], name: "GPS Constellation", type: "navigation" },
+                    { pos: [0, 30, 35786000], name: "Communications Sats", type: "comms" },
+                    { pos: [0, -30, 35786000], name: "Spy Satellites", type: "intel" },
+                    { pos: [30, 0, 35786000], name: "Weather Monitoring", type: "weather" }
+                ];
+                
+                spaceAssets.forEach((asset, i) => {
+                    setTimeout(() => {
+                        this.showAlert(`SPACE: ${asset.name} under attack`, "danger");
+                        
+                        // Create satellite
+                        const satellite = this.viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(asset.pos[0], asset.pos[1], asset.pos[2]),
+                            ellipse: {
+                                semiMinorAxis: 100000,
+                                semiMajorAxis: 100000,
+                                material: Cesium.Color.SILVER.withAlpha(0.8),
+                                outline: true,
+                                outlineColor: Cesium.Color.WHITE
+                            }
+                        });
+                        
+                        // Anti-satellite weapon
+                        setTimeout(() => {
+                            this.createASATAttack(asset.pos);
+                        }, 1000);
+                    }, i * 2000);
+                });
+            }
+            
+            // HOUR 72: The Final Choice
+            hourSeventyTwo() {
+                console.log('🎬 HOUR 72: The Final Choice');
+                
+                // Pull back to devastated Earth
+                this.smoothCameraMove(
+                    Cesium.Cartesian3.fromDegrees(0, 0, 25000000),
+                    8,
+                    () => {
+                        setTimeout(() => {
+                            this.showVoiceover("HOUR 72: 3 billion displaced. Markets collapsed. Alliances shattered.", 8000);
+                            
+                            // Show global devastation statistics
+                            this.showGlobalStats();
+                            
+                            setTimeout(() => {
+                                this.showVoiceover("Every decision cascades. Every alliance matters. What world will you create?", 10000);
+                                
+                                // Final decision interface
+                                this.showFinalDecision();
+                                
+                                // Auto-restart after 12 seconds
+                                setTimeout(() => {
+                                    this.cleanup();
+                                    setTimeout(() => this.start(), 3000);
+                                }, 12000);
+                            }, 8000);
+                        }, 3000);
+                    }
+                );
+            }
+            
+            showGlobalStats() {
+                const stats = document.createElement('div');
+                stats.style.cssText = `
+                    position: fixed; top: 20%; right: 5%; width: 300px;
+                    background: rgba(0,0,0,0.9); color: white; padding: 20px;
+                    border-radius: 15px; font-family: 'Courier New', monospace;
+                    border: 2px solid #ff4444; box-shadow: 0 0 30px rgba(255,68,68,0.5);
+                    animation: pulse 2s infinite;
+                `;
+                
+                stats.innerHTML = `
+                    <h3 style="color: #ff4444; margin: 0 0 15px 0;">GLOBAL IMPACT - HOUR 72</h3>
+                    <div style="margin-bottom: 8px;">💀 Casualties: 847,000</div>
+                    <div style="margin-bottom: 8px;">🏃 Displaced: 3.2 billion</div>
+                    <div style="margin-bottom: 8px;">📉 GDP Lost: $47 trillion</div>
+                    <div style="margin-bottom: 8px;">🏭 Factories Closed: 78%</div>
+                    <div style="margin-bottom: 8px;">🛡️ Alliances Broken: 12</div>
+                    <div style="margin-bottom: 8px;">🌊 Ports Blockaded: 156</div>
+                    <div style="margin-bottom: 8px;">⚡ Power Grids Down: 34%</div>
+                    <div style="margin-bottom: 8px;">🛰️ Satellites Destroyed: 89</div>
+                    <div style="color: #ff4444; font-weight: bold;">⚠️ CIVILIZATION: CRITICAL</div>
+                `;
+                
+                document.body.appendChild(stats);
+                
+                // Remove after 10 seconds
+                setTimeout(() => {
+                    if (stats.parentNode) {
+                        document.body.removeChild(stats);
+                    }
+                }, 10000);
+            }
+            
+            showFinalDecision() {
+                const finalChoice = document.createElement('div');
+                finalChoice.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+                    background: linear-gradient(135deg, #000, #1a1a2e, #16213e);
+                    color: white; padding: 50px; border-radius: 25px; text-align: center;
+                    width: 600px; z-index: 50000; transition: transform 2s ease;
+                    border: 3px solid #00ff88; box-shadow: 0 0 100px rgba(0,255,136,0.8);
+                `;
+                
+                finalChoice.innerHTML = `
+                    <h1 style="margin: 0 0 30px 0; color: #00ff88; font-size: 42px; text-shadow: 0 0 20px rgba(0,255,136,0.8);">
+                        COALITIONS
+                    </h1>
+                    <h2 style="margin: 0 0 25px 0; color: #ff4444; font-size: 24px;">
+                        The 72-Hour Crisis
+                    </h2>
+                    <p style="margin: 0 0 25px 0; font-size: 18px; line-height: 1.5;">
+                        When semiconductors stop flowing, civilization stops working.<br/>
+                        Every alliance. Every decision. Every consequence.
+                    </p>
+                    <p style="margin: 0 0 30px 0; font-size: 16px; color: #ccc;">
+                        Experience the most realistic geopolitical strategy simulation ever created.
+                    </p>
+                    <div style="font-size: 18px; color: #00ff88; font-weight: bold;">
+                        Coming Soon to Steam
+                    </div>
+                `;
+                
+                document.body.appendChild(finalChoice);
+                
+                // Animate in
+                setTimeout(() => finalChoice.style.transform = 'translate(-50%, -50%) scale(1)', 500);
+            }
+            
+            // Cleanup function
+            cleanup() {
+                // Stop sounds
+                Object.values(this.sounds).forEach(sound => {
+                    if (sound.pause) sound.pause();
+                });
+                
+                // Remove entities
+                this.viewer.entities.removeAll();
+                
+                // Remove UI
+                const ui = document.getElementById('cinematic-ui');
+                if (ui) ui.remove();
+                
+                // Remove any remaining popups
+                document.querySelectorAll('[style*="position: fixed"]').forEach(el => {
+                    if (el.textContent.includes('COALITION')) el.remove();
+                });
+                
+                this.isPlaying = false;
+            }
         }
         
         // Initialize cinematic trailer
@@ -2542,7 +2906,7 @@
         // Enhanced trailer start function
         function startTrailerSequence() {
             if (!cinematicTrailer) {
-                cinematicTrailer = new CinematicTrailerEnhanced(viewer);
+                cinematicTrailer = new CinematicTrailer(viewer);
             }
             cinematicTrailer.start();
         }
@@ -2580,497 +2944,6 @@
         
         // Start loading
         updateLoading();
-        
-        // COUNTRY DELIMITATIONS AND BORDERS SYSTEM
-        class CountryBordersSystem {
-            constructor(viewer) {
-                this.viewer = viewer;
-                this.countryBorders = null;
-                this.highlightedCountries = new Map();
-                this.allianceColors = {
-                    nato: Cesium.Color.BLUE.withAlpha(0.3),
-                    pacific: Cesium.Color.GREEN.withAlpha(0.3),
-                    neutral: Cesium.Color.YELLOW.withAlpha(0.3),
-                    hostile: Cesium.Color.RED.withAlpha(0.3),
-                    crisis: Cesium.Color.ORANGE.withAlpha(0.4)
-                };
-            }
-            
-            async initialize() {
-                console.log('🗺️ Loading country borders...');
-                
-                // Try to load country boundaries from multiple sources
-                await this.loadCountryBorders();
-                await this.createMajorCountryOutlines();
-                
-                console.log('✅ Country borders loaded');
-            }
-            
-            async loadCountryBorders() {
-                try {
-                    // Method 1: Try Natural Earth data (public GeoJSON)
-                    const response = await fetch('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson');
-                    if (response.ok) {
-                        const countryData = await response.json();
-                        this.countryBorders = await Cesium.GeoJsonDataSource.load(countryData, {
-                            stroke: Cesium.Color.WHITE.withAlpha(0.8),
-                            strokeWidth: 2,
-                            fill: Cesium.Color.TRANSPARENT,
-                            markerSymbol: '?'
-                        });
-                        this.viewer.dataSources.add(this.countryBorders);
-                        return;
-                    }
-                } catch (error) {
-                    console.log('External GeoJSON failed, using manual borders');
-                }
-                
-                // Fallback: Create manual country outlines
-                this.createManualCountryBorders();
-            }
-            
-            createManualCountryBorders() {
-                // Create major country outlines manually
-                const majorCountries = [
-                    {
-                        name: 'United States',
-                        outline: [
-                            [-125, 48], [-125, 25], [-80, 25], [-80, 45], [-70, 45], [-70, 48], [-125, 48]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'China',
-                        outline: [
-                            [73, 53], [135, 53], [135, 18], [73, 18], [73, 53]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'Russia',
-                        outline: [
-                            [19, 81], [180, 81], [180, 41], [19, 41], [19, 81]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'Europe',
-                        outline: [
-                            [-10, 71], [40, 71], [40, 35], [-10, 35], [-10, 71]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'Japan',
-                        outline: [
-                            [129, 46], [146, 46], [146, 30], [129, 30], [129, 46]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'Taiwan',
-                        outline: [
-                            [119.5, 25.5], [122, 25.5], [122, 21.5], [119.5, 21.5], [119.5, 25.5]
-                        ],
-                        color: Cesium.Color.CYAN
-                    },
-                    {
-                        name: 'South Korea',
-                        outline: [
-                            [125, 39], [130, 39], [130, 33], [125, 33], [125, 39]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'Australia',
-                        outline: [
-                            [113, -10], [154, -10], [154, -44], [113, -44], [113, -10]
-                        ],
-                        color: Cesium.Color.WHITE
-                    },
-                    {
-                        name: 'India',
-                        outline: [
-                            [68, 37], [97, 37], [97, 6], [68, 6], [68, 37]
-                        ],
-                        color: Cesium.Color.WHITE
-                    }
-                ];
-                
-                majorCountries.forEach(country => {
-                    this.createCountryOutline(country);
-                });
-            }
-            
-            createCountryOutline(country) {
-                try {
-                    // Convert outline to validated coordinates
-                    const positions = [];
-                    country.outline.forEach(coord => {
-                        const validated = this.validateCoordinates(coord[0], coord[1]);
-                        positions.push(validated.lon, validated.lat);
-                    });
-                    
-                    const countryEntity = this.viewer.entities.add({
-                        name: country.name,
-                        polyline: {
-                            positions: Cesium.Cartesian3.fromDegreesArray(positions),
-                            width: 2,
-                            material: new Cesium.PolylineGlowMaterialProperty({
-                                glowPower: 0.1,
-                                color: country.color.withAlpha(0.8)
-                            }),
-                            clampToGround: true
-                        }
-                    });
-                    
-                    return countryEntity;
-                } catch (error) {
-                    console.warn(`Failed to create outline for ${country.name}:`, error);
-                }
-            }
-            
-            // Coordinate validation (reuse from main class)
-            validateCoordinates(lon, lat) {
-                while (lon > 180) lon -= 360;
-                while (lon < -180) lon += 360;
-                lon = Math.max(-179.99, Math.min(179.99, lon));
-                lat = Math.max(-89.99, Math.min(89.99, lat));
-                return { lon, lat };
-            }
-            
-            // Highlight specific countries during crisis
-            highlightCountry(countryName, alliance, intensity = 0.4) {
-                try {
-                    const color = this.allianceColors[alliance] || Cesium.Color.WHITE.withAlpha(intensity);
-                    
-                    // Find and highlight the country
-                    const countryData = this.getCountryData(countryName);
-                    if (!countryData) return;
-                    
-                    const highlightEntity = this.viewer.entities.add({
-                        name: `${countryName}_highlight`,
-                        polygon: {
-                            hierarchy: Cesium.Cartesian3.fromDegreesArray(countryData.coordinates),
-                            material: color,
-                            outline: true,
-                            outlineColor: color.brighten(0.3, new Cesium.Color()),
-                            height: 1000
-                        }
-                    });
-                    
-                    this.highlightedCountries.set(countryName, highlightEntity);
-                    return highlightEntity;
-                } catch (error) {
-                    console.warn(`Failed to highlight ${countryName}:`, error);
-                }
-            }
-            
-            getCountryData(countryName) {
-                // Simplified country coordinate data
-                const countryCoordinates = {
-                    'United States': [-125, 25, -80, 25, -80, 48, -125, 48, -125, 25],
-                    'China': [73, 18, 135, 18, 135, 53, 73, 53, 73, 18],
-                    'Russia': [19, 41, 180, 41, 180, 81, 19, 81, 19, 41],
-                    'Taiwan': [119.5, 21.5, 122, 21.5, 122, 25.5, 119.5, 25.5, 119.5, 21.5],
-                    'Japan': [129, 30, 146, 30, 146, 46, 129, 46, 129, 30],
-                    'South Korea': [125, 33, 130, 33, 130, 39, 125, 39, 125, 33],
-                    'Germany': [5.9, 47.3, 15.0, 47.3, 15.0, 55.1, 5.9, 55.1, 5.9, 47.3],
-                    'United Kingdom': [-8.6, 49.9, 1.8, 49.9, 1.8, 60.8, -8.6, 60.8, -8.6, 49.9],
-                    'France': [-5.1, 42.3, 8.2, 42.3, 8.2, 51.1, -5.1, 51.1, -5.1, 42.3],
-                    'Australia': [113, -44, 154, -44, 154, -10, 113, -10, 113, -44],
-                    'Philippines': [116, 4, 127, 4, 127, 21, 116, 21, 116, 4],
-                    'Turkey': [25.7, 35.8, 44.8, 35.8, 44.8, 42.1, 25.7, 42.1, 25.7, 35.8],
-                    'Hungary': [16.1, 45.7, 22.9, 45.7, 22.9, 48.6, 16.1, 48.6, 16.1, 45.7],
-                    'Saudi Arabia': [34.5, 16.0, 55.7, 16.0, 55.7, 32.2, 34.5, 32.2, 34.5, 16.0]
-                };
-                
-                const coords = countryCoordinates[countryName];
-                if (!coords) return null;
-                
-                // Validate all coordinates
-                const validatedCoords = [];
-                for (let i = 0; i < coords.length; i += 2) {
-                    const validated = this.validateCoordinates(coords[i], coords[i + 1]);
-                    validatedCoords.push(validated.lon, validated.lat);
-                }
-                
-                return { coordinates: validatedCoords };
-            }
-            
-            // Show alliance formations
-            showAllianceFormation(allianceName, countries, color) {
-                countries.forEach(country => {
-                    this.highlightCountry(country, allianceName);
-                });
-                
-                // Add alliance label
-                const centerCoord = this.calculateAllianceCenter(countries);
-                if (centerCoord) {
-                    this.viewer.entities.add({
-                        name: `${allianceName}_label`,
-                        position: Cesium.Cartesian3.fromDegrees(centerCoord.lon, centerCoord.lat, 100000),
-                        label: {
-                            text: allianceName.toUpperCase(),
-                            font: '18pt bold sans-serif',
-                            fillColor: color.brighten(0.5, new Cesium.Color()),
-                            outlineColor: Cesium.Color.BLACK,
-                            outlineWidth: 3,
-                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            pixelOffset: new Cesium.Cartesian2(0, -50)
-                        }
-                    });
-                }
-            }
-            
-            calculateAllianceCenter(countries) {
-                // Simple center calculation for alliance label
-                const centers = {
-                    'United States': { lon: -100, lat: 40 },
-                    'China': { lon: 104, lat: 35 },
-                    'Russia': { lon: 100, lat: 60 },
-                    'Germany': { lon: 10, lat: 51 },
-                    'Japan': { lon: 138, lat: 36 },
-                    'United Kingdom': { lon: -2, lat: 54 },
-                    'France': { lon: 2, lat: 46 },
-                    'Taiwan': { lon: 121, lat: 24 },
-                    'South Korea': { lon: 128, lat: 36 },
-                    'Australia': { lon: 133, lat: -27 }
-                };
-                
-                if (countries.length === 0) return null;
-                
-                let totalLon = 0, totalLat = 0;
-                let validCount = 0;
-                
-                countries.forEach(country => {
-                    const center = centers[country];
-                    if (center) {
-                        totalLon += center.lon;
-                        totalLat += center.lat;
-                        validCount++;
-                    }
-                });
-                
-                if (validCount === 0) return null;
-                
-                return {
-                    lon: totalLon / validCount,
-                    lat: totalLat / validCount
-                };
-            }
-            
-            // Show territorial disputes
-            showTerritorialDispute(region, disputingCountries) {
-                const disputeRegions = {
-                    'Taiwan Strait': {
-                        coordinates: [119, 23, 123, 23, 123, 26, 119, 26, 119, 23],
-                        center: { lon: 121, lat: 24.5 }
-                    },
-                    'South China Sea': {
-                        coordinates: [99, 0, 121, 0, 121, 23, 99, 23, 99, 0],
-                        center: { lon: 110, lat: 12 }
-                    },
-                    'Korean Peninsula': {
-                        coordinates: [125, 33, 130, 33, 130, 43, 125, 43, 125, 33],
-                        center: { lon: 127.5, lat: 38 }
-                    }
-                };
-                
-                const regionData = disputeRegions[region];
-                if (!regionData) return;
-                
-                // Validate coordinates
-                const validatedCoords = [];
-                for (let i = 0; i < regionData.coordinates.length; i += 2) {
-                    const validated = this.validateCoordinates(regionData.coordinates[i], regionData.coordinates[i + 1]);
-                    validatedCoords.push(validated.lon, validated.lat);
-                }
-                
-                // Create dispute zone
-                const disputeZone = this.viewer.entities.add({
-                    name: `${region}_dispute`,
-                    polygon: {
-                        hierarchy: Cesium.Cartesian3.fromDegreesArray(validatedCoords),
-                        material: new Cesium.ColorMaterialProperty(
-                            new Cesium.CallbackProperty(() => {
-                                const time = Date.now() / 1000;
-                                const alpha = 0.3 + Math.sin(time * 4) * 0.2;
-                                return Cesium.Color.RED.withAlpha(alpha);
-                            }, false)
-                        ),
-                        outline: true,
-                        outlineColor: Cesium.Color.RED,
-                        height: 500
-                    }
-                });
-                
-                // Add dispute label
-                const center = this.validateCoordinates(regionData.center.lon, regionData.center.lat);
-                this.viewer.entities.add({
-                    name: `${region}_dispute_label`,
-                    position: Cesium.Cartesian3.fromDegrees(center.lon, center.lat, 50000),
-                    label: {
-                        text: `⚠️ DISPUTED: ${region}`,
-                        font: '14pt bold sans-serif',
-                        fillColor: Cesium.Color.RED,
-                        outlineColor: Cesium.Color.WHITE,
-                        outlineWidth: 2,
-                        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                        backgroundColor: Cesium.Color.BLACK.withAlpha(0.7),
-                        backgroundPadding: new Cesium.Cartesian2(10, 5)
-                    }
-                });
-            }
-            
-            // Remove all highlights
-            clearHighlights() {
-                this.highlightedCountries.forEach((entity, countryName) => {
-                    try {
-                        this.viewer.entities.remove(entity);
-                    } catch (error) {
-                        console.warn(`Failed to remove highlight for ${countryName}`);
-                    }
-                });
-                this.highlightedCountries.clear();
-            }
-        }
-        
-        // Initialize country borders system
-        let countryBorders = null;
-        
-        // Enhanced trailer with country highlighting
-        class CinematicTrailerEnhanced extends CinematicTrailer {
-            constructor(viewer) {
-                super(viewer);
-                this.countryBorders = countryBorders;
-            }
-            
-            // Enhanced Hour Zero with country highlighting
-            hourZero() {
-                console.log('🎬 ACT I: THE SPARK');
-                this.showVoiceover("HOUR 0: Taiwan Strait - A single miscalculation...", 6000);
-                
-                // Highlight Taiwan and China
-                if (this.countryBorders) {
-                    this.countryBorders.highlightCountry('Taiwan', 'crisis', 0.6);
-                    this.countryBorders.highlightCountry('China', 'hostile', 0.4);
-                    this.countryBorders.showTerritorialDispute('Taiwan Strait', ['China', 'Taiwan']);
-                }
-                
-                // Start with peaceful TSMC facilities in Taiwan
-                this.smoothCameraMove(
-                    Cesium.Cartesian3.fromDegrees(120.9605, 24.7736, 500000),
-                    4,
-                    () => {
-                        this.createTSMCFacilities();
-                        
-                        setTimeout(() => {
-                            this.showAlert("BREAKING: Chinese naval exercises escalate near Taiwan", "danger");
-                            this.showAlert("TSMC halts production at 3nm fabs", "danger");
-                            
-                            this.createNavalBlockade();
-                            
-                            setTimeout(() => {
-                                this.showAlert("NASDAQ futures down 8% in after-hours trading", "danger");
-                                this.showAlert("Apple, NVIDIA trading halted", "danger");
-                                setTimeout(() => this.hourSix(), 4000);
-                            }, 3000);
-                        }, 4000);
-                    }
-                );
-            }
-            
-            // Enhanced Hour Twelve with alliance highlighting
-            hourTwelve() {
-                console.log('🎬 HOUR 12: Economic Warfare & Cyber Attacks');
-                this.showVoiceover("HOUR 12: When economics becomes warfare...", 6000);
-                
-                // Show NATO alliance formation
-                if (this.countryBorders) {
-                    this.countryBorders.showAllianceFormation('NATO', 
-                        ['United States', 'United Kingdom', 'France', 'Germany'], 
-                        this.countryBorders.allianceColors.nato
-                    );
-                }
-                
-                this.smoothCameraMove(
-                    Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 2000000),
-                    4,
-                    () => {
-                        const financialAttacks = [
-                            { pos: [-74.006, 40.7128], event: "NYSE circuit breakers triggered", type: "market", country: "United States" },
-                            { pos: [-0.1276, 51.5074], event: "London: £ crashes to historic low", type: "currency", country: "United Kingdom" },
-                            { pos: [139.6917, 35.6895], event: "Tokyo: Bank runs begin", type: "banking", country: "Japan" },
-                            { pos: [8.6821, 50.1109], event: "Frankfurt: ECB emergency meeting", type: "central_bank", country: "Germany" },
-                            { pos: [121.4737, 31.2304], event: "Shanghai: Capital controls imposed", type: "controls", country: "China" }
-                        ];
-                        
-                        financialAttacks.forEach((attack, i) => {
-                            setTimeout(() => {
-                                this.showAlert(attack.event, "danger");
-                                this.createFinancialCrisis(attack.pos, attack.type);
-                                
-                                // Highlight affected country
-                                if (this.countryBorders && attack.country) {
-                                    this.countryBorders.highlightCountry(attack.country, 'crisis', 0.5);
-                                }
-                                
-                                if (i === 2) {
-                                    this.createCyberAttackWave();
-                                }
-                            }, i * 2000);
-                        });
-                        
-                        setTimeout(() => this.hourTwentyFour(), 12000);
-                    }
-                );
-            }
-            
-            // Enhanced Hour Twenty-Four with alliance fractures
-            hourTwentyFour() {
-                console.log('🎬 HOUR 24: Alliance Fractures & Refugee Crisis');
-                this.showVoiceover("HOUR 24: When allies become adversaries...", 6000);
-                
-                this.smoothCameraMove(
-                    Cesium.Cartesian3.fromDegrees(10, 50, 6000000),
-                    5,
-                    () => {
-                        // Show alliance fractures with country highlighting
-                        const allianceCrises = [
-                            { event: "Germany suspends NATO Article 5 compliance", country: "Germany", alliance: "neutral" },
-                            { event: "Turkey closes Bosphorus to US ships", country: "Turkey", alliance: "hostile" },
-                            { event: "Hungary aligns with China on sanctions", country: "Hungary", alliance: "hostile" },
-                            { event: "Philippines revokes US base agreements", country: "Philippines", alliance: "neutral" },
-                            { event: "Saudi Arabia accepts yuan for oil", country: "Saudi Arabia", alliance: "hostile" }
-                        ];
-                        
-                        allianceCrises.forEach((crisis, i) => {
-                            setTimeout(() => {
-                                this.showAlert(crisis.event, "danger");
-                                
-                                // Highlight country switching sides
-                                if (this.countryBorders) {
-                                    this.countryBorders.highlightCountry(crisis.country, crisis.alliance, 0.6);
-                                }
-                            }, i * 1500);
-                        });
-                        
-                        setTimeout(() => {
-                            this.createRefugeeCrisis();
-                        }, 3000);
-                        
-                        setTimeout(() => {
-                            this.createResourceWars();
-                        }, 6000);
-                        
-                        setTimeout(() => this.hourFortyEight(), 12000);
-                    }
-                );
-            }
-        }
-        
     </script>
 </body>
 </html>
