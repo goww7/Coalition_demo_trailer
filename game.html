@@ -1955,24 +1955,25 @@
             
             // Enhanced alert with sound and animation
             showAlert(text, type = 'danger') {
-                this.playSound('alert');
+                // Limit alerts - only show the most critical ones
+                const alertSystem = document.getElementById('alert-system');
+                if (!alertSystem) return;
                 
-                const alerts = document.getElementById('alert-system');
-                if (!alerts) return;
-                
+                // Remove "GLOBAL ALERT:" prefix for cleaner look
                 const alert = document.createElement('div');
                 alert.style.cssText = `
                     background: ${type === 'danger' ? 'linear-gradient(135deg, #ff4444, #cc0000)' : 'linear-gradient(135deg, #00ff88, #00cc66)'};
-                    color: white; padding: 15px; margin-bottom: 10px; border-radius: 8px;
-                    transform: translateX(100%); transition: transform 0.5s ease;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                    color: white; padding: 12px 20px; margin-bottom: 8px; border-radius: 8px;
+                    transform: translateX(100%); transition: all 0.8s ease;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
                     border-left: 4px solid ${type === 'danger' ? '#ffffff' : '#000000'};
+                    font-size: 14px; font-weight: 500;
                 `;
                 
                 alert.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 12px; height: 12px; background: white; border-radius: 50%; animation: pulse 1s infinite;"></div>
-                        <strong>GLOBAL ALERT:</strong> ${text}
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                        ${text}
                     </div>
                 `;
                 
@@ -1981,10 +1982,76 @@
                 // Animate in
                 setTimeout(() => alert.style.transform = 'translateX(0)', 100);
                 
-                // Remove after delay
+                // Remove after delay - shorter duration
                 setTimeout(() => {
                     alert.style.transform = 'translateX(100%)';
-                    setTimeout(() => alerts.removeChild(alert), 500);
+                    setTimeout(() => {
+                        if (alerts.contains(alert)) {
+                            alerts.removeChild(alert);
+                        }
+                    }, 800);
+                }, 2500); // Reduced from 4000ms
+            }
+            
+            // Show dramatic text overlay instead of alerts
+            showDramaticText(text, duration = 3000, size = 'large') {
+                const dramaticText = document.createElement('div');
+                dramaticText.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);
+                    background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(20,20,20,0.8));
+                    color: #ff4444; padding: ${size === 'large' ? '30px 60px' : '20px 40px'};
+                    border-radius: 15px; text-align: center; z-index: 15000;
+                    font-size: ${size === 'large' ? '32px' : '24px'}; font-weight: bold;
+                    border: 2px solid #ff4444; box-shadow: 0 0 50px rgba(255,68,68,0.5);
+                    text-shadow: 0 0 10px rgba(255,68,68,0.8);
+                    transition: all 1s ease; pointer-events: none;
+                `;
+                dramaticText.textContent = text;
+                
+                document.body.appendChild(dramaticText);
+                
+                // Animate in
+                setTimeout(() => dramaticText.style.transform = 'translate(-50%, -50%) scale(1)', 100);
+                
+                // Animate out
+                setTimeout(() => {
+                    dramaticText.style.transform = 'translate(-50%, -50%) scale(0)';
+                    setTimeout(() => {
+                        if (document.body.contains(dramaticText)) {
+                            document.body.removeChild(dramaticText);
+                        }
+                    }, 1000);
+                }, duration);
+            }
+            
+            // Show location title instead of alert
+            showLocationTitle(location, subtitle = '') {
+                const locationTitle = document.createElement('div');
+                locationTitle.style.cssText = `
+                    position: fixed; bottom: 200px; left: 50px;
+                    background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(30,30,30,0.8));
+                    color: white; padding: 20px 30px; border-radius: 10px;
+                    border-left: 4px solid #00ff88; z-index: 12000;
+                    opacity: 0; transition: all 1s ease; pointer-events: none;
+                `;
+                locationTitle.innerHTML = `
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 5px;">${location}</div>
+                    ${subtitle ? `<div style="font-size: 16px; opacity: 0.8;">${subtitle}</div>` : ''}
+                `;
+                
+                document.body.appendChild(locationTitle);
+                
+                // Animate in
+                setTimeout(() => locationTitle.style.opacity = '1', 100);
+                
+                // Remove after 4 seconds
+                setTimeout(() => {
+                    locationTitle.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(locationTitle)) {
+                            document.body.removeChild(locationTitle);
+                        }
+                    }, 1000);
                 }, 4000);
             }
             
@@ -2021,9 +2088,9 @@
                 return { lon, lat };
             }
             
-            // HOUR 0: The Semiconductor Crisis Begins (FIXED)
+            // HOUR 0: The Semiconductor Crisis Begins (IMPROVED)
             hourZero() {
-                console.log('🎬 HOUR 0: The Semiconductor Trigger');
+                console.log('🎬 ACT I: THE SPARK');
                 this.showVoiceover("HOUR 0: Taiwan Strait - A single miscalculation...", 6000);
                 
                 // Start with peaceful TSMC facilities in Taiwan
@@ -2031,20 +2098,25 @@
                     Cesium.Cartesian3.fromDegrees(120.9605, 24.7736, 500000), // Taiwan
                     4,
                     () => {
+                        // Show location title instead of alert
+                        this.showLocationTitle("Taiwan Semiconductor", "TSMC Fabrication Facilities");
+                        
                         // Show TSMC facilities
                         this.createTSMCFacilities();
                         
                         setTimeout(() => {
-                            this.showAlert("BREAKING: Chinese naval exercises escalate near Taiwan", "danger");
-                            this.showAlert("TSMC halts production at 3nm fabs", "danger");
+                            // Only one critical alert
+                            this.showAlert("Naval exercises escalate - TSMC production halted", "danger");
+                            
+                            // Dramatic text overlay
+                            this.showDramaticText("90% OF WORLD'S ADVANCED CHIPS", 4000, 'large');
                             
                             // Create naval blockade visualization
                             this.createNavalBlockade();
                             
-                            // Show immediate market reaction
+                            // Show immediate market reaction with dramatic text
                             setTimeout(() => {
-                                this.showAlert("NASDAQ futures down 8% in after-hours trading", "danger");
-                                this.showAlert("Apple, NVIDIA trading halted", "danger");
+                                this.showDramaticText("MARKETS IN FREEFALL", 3000);
                                 
                                 // Move to global impact
                                 setTimeout(() => this.hourSix(), 4000);
@@ -2162,9 +2234,9 @@
                 });
             }
             
-            // HOUR 6: Global Supply Chain Collapse
+            // HOUR 6: Global Supply Chain Collapse (IMPROVED)
             hourSix() {
-                console.log('🎬 HOUR 6: Global Supply Chain Collapse');
+                console.log('🎬 ACT II: THE RIPPLE');
                 this.showVoiceover("HOUR 6: 90% of advanced chips come from here. The world stops.", 6000);
                 
                 // Pull back to show global shipping routes
@@ -2175,25 +2247,26 @@
                         // Show disrupted shipping routes
                         this.createDisruptedShipping();
                         
-                        // Factory shutdowns cascade
+                        // Factory shutdowns cascade - use dramatic text instead of alerts
                         const factoryShutdowns = [
-                            { pos: [139.6917, 35.6895], name: "Toyota halts production", country: "Japan" },
-                            { pos: [-83.0458, 42.3314], name: "Ford suspends assembly lines", country: "USA" },
-                            { pos: [8.6821, 50.1109], name: "Volkswagen closes plants", country: "Germany" },
-                            { pos: [121.4737, 31.2304], name: "Tesla Shanghai offline", country: "China" },
-                            { pos: [-122.0322, 37.3230], name: "Apple delays iPhone launch", country: "USA" }
+                            { pos: [139.6917, 35.6895], name: "TOKYO", subtitle: "Toyota production halted", country: "Japan" },
+                            { pos: [-83.0458, 42.3314], name: "DETROIT", subtitle: "Ford assembly lines suspended", country: "USA" },
+                            { pos: [8.6821, 50.1109], name: "GERMANY", subtitle: "Volkswagen plants offline", country: "Germany" },
+                            { pos: [121.4737, 31.2304], name: "SHANGHAI", subtitle: "Tesla factory shutdown", country: "China" }
                         ];
                         
                         factoryShutdowns.forEach((shutdown, i) => {
                             setTimeout(() => {
-                                this.showAlert(`${shutdown.name} - ${shutdown.country}`, "danger");
+                                // Show location title instead of alert
+                                this.showLocationTitle(shutdown.name, shutdown.subtitle);
                                 
                                 // Create factory shutdown visualization
-                                const factory = this.viewer.entities.add({
-                                    position: Cesium.Cartesian3.fromDegrees(shutdown.pos[0], shutdown.pos[1], 0),
+                                const coords = this.validateCoordinates(shutdown.pos[0], shutdown.pos[1]);
+                                const factory = this.createSafeEntity({
+                                    position: Cesium.Cartesian3.fromDegrees(coords.lon, coords.lat, 0),
                                     ellipse: {
-                                        semiMinorAxis: 20000,
-                                        semiMajorAxis: 20000,
+                                        semiMinorAxis: 30000,
+                                        semiMajorAxis: 30000,
                                         material: Cesium.Color.ORANGE.withAlpha(0.7),
                                         outline: true,
                                         outlineColor: Cesium.Color.RED
@@ -2201,9 +2274,14 @@
                                 });
                                 
                                 // Add smoke effect
-                                this.createSmokeEffect(shutdown.pos);
-                            }, i * 1500);
+                                this.createSmokeEffect([coords.lon, coords.lat]);
+                            }, i * 2000);
                         });
+                        
+                        // One dramatic summary text
+                        setTimeout(() => {
+                            this.showDramaticText("GLOBAL MANUFACTURING COLLAPSE", 4000, 'large');
+                        }, 6000);
                         
                         setTimeout(() => this.hourTwelve(), 10000);
                     }
@@ -2476,9 +2554,9 @@
                 }, 5000);
             }
             
-            // HOUR 12: Economic Warfare & Cyber Attacks
+            // HOUR 12: Economic Warfare & Cyber Attacks (IMPROVED)
             hourTwelve() {
-                console.log('🎬 HOUR 12: Economic Warfare & Cyber Attacks');
+                console.log('🎬 ACT III: THE CHOICE');
                 this.showVoiceover("HOUR 12: When economics becomes warfare...", 6000);
                 
                 // Show global financial centers
@@ -2486,25 +2564,28 @@
                     Cesium.Cartesian3.fromDegrees(-74.006, 40.7128, 2000000), // NYC
                     4,
                     () => {
-                        // Financial warfare cascade
+                        // Financial warfare cascade - reduce alerts, use location titles
                         const financialAttacks = [
-                            { pos: [-74.006, 40.7128], event: "NYSE circuit breakers triggered", type: "market" },
-                            { pos: [-0.1276, 51.5074], event: "London: £ crashes to historic low", type: "currency" },
-                            { pos: [139.6917, 35.6895], event: "Tokyo: Bank runs begin", type: "banking" },
-                            { pos: [8.6821, 50.1109], event: "Frankfurt: ECB emergency meeting", type: "central_bank" },
-                            { pos: [121.4737, 31.2304], event: "Shanghai: Capital controls imposed", type: "controls" }
+                            { pos: [-74.006, 40.7128], location: "NEW YORK", subtitle: "NYSE circuit breakers triggered", type: "market" },
+                            { pos: [-0.1276, 51.5074], location: "LONDON", subtitle: "Pound crashes to historic low", type: "currency" },
+                            { pos: [139.6917, 35.6895], location: "TOKYO", subtitle: "Banking system under stress", type: "banking" },
+                            { pos: [8.6821, 50.1109], location: "FRANKFURT", subtitle: "ECB emergency protocols", type: "central_bank" }
                         ];
                         
                         financialAttacks.forEach((attack, i) => {
                             setTimeout(() => {
-                                this.showAlert(attack.event, "danger");
+                                // Use location titles instead of alerts
+                                this.showLocationTitle(attack.location, attack.subtitle);
                                 this.createFinancialCrisis(attack.pos, attack.type);
                                 
-                                // Cyber attack visualization
+                                // Cyber attack visualization - only for one location
                                 if (i === 2) { // During Tokyo crisis
-                                    this.createCyberAttackWave();
+                                    setTimeout(() => {
+                                        this.showDramaticText("CYBER WARFARE INITIATED", 4000);
+                                        this.createCyberAttackWave();
+                                    }, 1000);
                                 }
-                            }, i * 2000);
+                            }, i * 2500);
                         });
                         
                         setTimeout(() => this.hourTwentyFour(), 12000);
@@ -2548,9 +2629,9 @@
                 });
             }
             
-            // HOUR 24: Alliance Fractures & Refugee Crisis
+            // HOUR 24: Alliance Fractures & Refugee Crisis (IMPROVED)
             hourTwentyFour() {
-                console.log('🎬 HOUR 24: Alliance Fractures & Refugee Crisis');
+                console.log('🎬 ACT IV: THE STORM');
                 this.showVoiceover("HOUR 24: When allies become adversaries...", 6000);
                 
                 // Show alliance breakdown
@@ -2558,16 +2639,21 @@
                     Cesium.Cartesian3.fromDegrees(10, 50, 6000000), // Europe
                     5,
                     () => {
-                        // Alliance fractures
+                        // Dramatic text instead of multiple alerts
+                        this.showDramaticText("ALLIANCES FRACTURING", 4000, 'large');
+                        
+                        // Alliance fractures - minimal alerts, more visual
                         this.showAllianceFractures();
                         
                         // Refugee flows
                         setTimeout(() => {
+                            this.showDramaticText("MASS DISPLACEMENT", 4000);
                             this.createRefugeeCrisis();
                         }, 3000);
                         
                         // Resource wars
                         setTimeout(() => {
+                            this.showDramaticText("RESOURCE WARS", 4000);
                             this.createResourceWars();
                         }, 6000);
                         
@@ -2577,22 +2663,22 @@
             }
             
             showAllianceFractures() {
-                // NATO fractures
-                const allianceCrises = [
-                    { event: "Germany suspends NATO Article 5 compliance", pos: [13.4050, 52.5200] },
-                    { event: "Turkey closes Bosphorus to US ships", pos: [28.9784, 41.0082] },
-                    { event: "Hungary aligns with China on sanctions", pos: [19.0402, 47.4979] },
-                    { event: "Philippines revokes US base agreements", pos: [121.7740, 12.8797] },
-                    { event: "Saudi Arabia accepts yuan for oil", pos: [46.6753, 24.7136] }
+                // Show only 2-3 key fractures, not all of them
+                const keyFractures = [
+                    { event: "NATO Article 5 suspended", pos: [13.4050, 52.5200], location: "BERLIN" },
+                    { event: "Bosphorus Strait closed to US", pos: [28.9784, 41.0082], location: "ISTANBUL" },
+                    { event: "Yuan accepted for oil trades", pos: [46.6753, 24.7136], location: "RIYADH" }
                 ];
                 
-                allianceCrises.forEach((crisis, i) => {
+                keyFractures.forEach((crisis, i) => {
                     setTimeout(() => {
-                        this.showAlert(crisis.event, "danger");
+                        // Use location titles instead of alerts
+                        this.showLocationTitle(crisis.location, crisis.event);
                         
                         // Show alliance break visualization
-                        const breakPoint = this.viewer.entities.add({
-                            position: Cesium.Cartesian3.fromDegrees(crisis.pos[0], crisis.pos[1], 0),
+                        const coords = this.validateCoordinates(crisis.pos[0], crisis.pos[1]);
+                        const breakPoint = this.createSafeEntity({
+                            position: Cesium.Cartesian3.fromDegrees(coords.lon, coords.lat, 0),
                             ellipse: {
                                 semiMinorAxis: 80000,
                                 semiMajorAxis: 80000,
@@ -2601,55 +2687,43 @@
                                 outlineColor: Cesium.Color.ORANGE
                             }
                         });
-                    }, i * 1500);
+                    }, i * 2000);
                 });
             }
             
             createRefugeeCrisis() {
-                // Refugee movement flows
-                const refugeeFlows = [
-                    { 
-                        from: [121.5654, 25.0330], // Taiwan
-                        to: [121.7740, 12.8797],   // Philippines
-                        count: "2.3M refugees"
-                    },
-                    {
-                        from: [126.9780, 37.5665], // South Korea
-                        to: [139.6917, 35.6895],   // Japan
-                        count: "800K evacuees"
-                    },
-                    {
-                        from: [139.6917, 35.6895], // Japan
-                        to: [-122.4194, 37.7749],  // USA West Coast
-                        count: "1.1M displaced"
-                    }
-                ];
+                // Show only the most significant refugee flow
+                const majorFlow = { 
+                    from: [121.5654, 25.0330], // Taiwan
+                    to: [121.7740, 12.8797],   // Philippines
+                    count: "2.3M refugees"
+                };
                 
-                refugeeFlows.forEach((flow, i) => {
-                    setTimeout(() => {
-                        this.showAlert(`Refugee Crisis: ${flow.count} fleeing conflict zones`, "danger");
-                        
-                        // Create refugee flow visualization
-                        const refugeePath = this.viewer.entities.add({
-                            polyline: {
-                                positions: Cesium.Cartesian3.fromDegreesArray([
-                                    flow.from[0], flow.from[1],
-                                    flow.to[0], flow.to[1]
-                                ]),
-                                width: 8,
-                                material: new Cesium.PolylineGlowMaterialProperty({
-                                    glowPower: 0.2,
-                                    color: Cesium.Color.ORANGE.withAlpha(0.7)
-                                }),
-                                clampToGround: false,
-                                height: 5000
-                            }
-                        });
-                        
-                        // Animated refugee camps
-                        this.createRefugeeCamp(flow.to);
-                    }, i * 2000);
+                // Use location title instead of alert
+                this.showLocationTitle("TAIWAN STRAIT", "Massive evacuation underway");
+                
+                // Create refugee flow visualization
+                const fromCoords = this.validateCoordinates(majorFlow.from[0], majorFlow.from[1]);
+                const toCoords = this.validateCoordinates(majorFlow.to[0], majorFlow.to[1]);
+                
+                const refugeePath = this.createSafeEntity({
+                    polyline: {
+                        positions: Cesium.Cartesian3.fromDegreesArray([
+                            fromCoords.lon, fromCoords.lat,
+                            toCoords.lon, toCoords.lat
+                        ]),
+                        width: 8,
+                        material: new Cesium.PolylineGlowMaterialProperty({
+                            glowPower: 0.2,
+                            color: Cesium.Color.ORANGE.withAlpha(0.7)
+                        }),
+                        clampToGround: false,
+                        height: 5000
+                    }
                 });
+                
+                // Animated refugee camps
+                this.createRefugeeCamp([toCoords.lon, toCoords.lat]);
             }
             
             createResourceWars() {
