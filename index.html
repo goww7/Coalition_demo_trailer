@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coalitions - Command the Future</title>
+    <meta name="description" content="The most advanced real-time strategy experience. Command global forces with unprecedented precision on a living 3D world.">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700;800&family=SF+Pro+Text:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Cesium -->
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.120/Build/Cesium/Cesium.js"></script>
+    
+    <style>
+        :root {
+            /* Apple-inspired fluid design system */
+            --primary-blue: #007AFF;
+            --primary-blue-light: #5AC8FA;
+            --secondary-purple: #AF52DE;
+            --accent-orange: #FF9F0A;
+            --background-primary: #FFFFFF;
+            --background-secondary: #F2F2F7;
+            --background-elevated: rgba(255, 255, 255, 0.8);
+            --glass-background: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #000000;
+            --text-secondary: #3C3C43;
+            --text-tertiary: #8E8E93;
+            --system-gray: #F2F2F7;
+            --system-gray-2: #E5E5EA;
+            
+            /* Shadows & Blur */
+            --shadow-small: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.1);
+            --shadow-large: 0 8px 32px rgba(0, 0, 0, 0.15);
+            --blur-background: blur(20px);
+            --blur-glass: blur(40px);
+            
+            /* Gradients */
+            --gradient-hero: linear-gradient(135deg, #007AFF 0%, #5AC8FA 50%, #AF52DE 100%);
+            --gradient-card: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            --gradient-text: linear-gradient(135deg, #007AFF, #AF52DE);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation - Floating glassmorphism */
+        nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 25, 45, 0.95);
+            backdrop-filter: var(--blur-glass);
+            -webkit-backdrop-filter: var(--blur-glass);
+            border: 1px solid rgba(90, 200, 250, 0.3);
+            border-radius: 24px;
+            padding: 8px 20px;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(15, 25, 45, 0.4);
+        }
+
+        nav:hover {
+            background: rgba(15, 25, 45, 0.98);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 12px 40px rgba(15, 25, 45, 0.6), 0 0 20px rgba(90, 200, 250, 0.2);
+            border-color: rgba(90, 200, 250, 0.5);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .logo {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(90, 200, 250, 1) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(90, 200, 250, 1) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(90, 200, 250, 0.3);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-links a:hover {
+            background: rgba(90, 200, 250, 0.15);
+            color: rgba(90, 200, 250, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(90, 200, 250, 0.2);
+        }
+
+        .cta-nav {
+            background: linear-gradient(135deg, rgba(90, 200, 250, 0.9) 0%, rgba(0, 122, 255, 1) 100%);
+            color: white !important;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(90, 200, 250, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .cta-nav:hover {
+            background: linear-gradient(135deg, rgba(90, 200, 250, 1) 0%, rgba(0, 122, 255, 1) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(90, 200, 250, 0.4), 0 0 20px rgba(90, 200, 250, 0.2);
+            border-color: rgba(90, 200, 250, 0.6);
+        }
+
+        /* Hero Section - Enhanced with dynamic backgrounds */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gradient-hero);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Dynamic background system */
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            opacity: 0.8;
+        }
+
+        /* NASA Earth satellite background */
+        .bg-earth {
+            background: 
+                linear-gradient(135deg, rgba(0, 122, 255, 0.9) 0%, rgba(90, 200, 250, 0.8) 50%, rgba(175, 82, 222, 0.9) 100%),
+                url('https://images-assets.nasa.gov/image/PIA18033/PIA18033~large.jpg') center/cover no-repeat,
+                radial-gradient(ellipse at center, rgba(30, 87, 153, 0.8) 0%, rgba(15, 43, 77, 0.9) 60%, rgba(5, 15, 25, 0.95) 100%);
+        }
+
+        /* Fallback gradient if image fails to load */
+        .bg-earth-fallback {
+            background: 
+                linear-gradient(135deg, rgba(0, 122, 255, 0.9) 0%, rgba(90, 200, 250, 0.8) 50%, rgba(175, 82, 222, 0.9) 100%),
+                radial-gradient(circle at 30% 30%, rgba(30, 87, 153, 0.9) 0%, rgba(15, 43, 77, 0.8) 40%, rgba(5, 15, 25, 0.9) 80%),
+                linear-gradient(45deg, 
+                    rgba(0, 122, 255, 0.1) 0%, 
+                    rgba(90, 200, 250, 0.15) 25%, 
+                    rgba(0, 122, 255, 0.1) 50%, 
+                    rgba(175, 82, 222, 0.15) 75%, 
+                    rgba(0, 122, 255, 0.1) 100%
+                );
+        }
+
+
+
+        /* Animated particles overlay */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 122, 255, 0.3) 0%, transparent 3%),
+                radial-gradient(circle at 80% 40%, rgba(175, 82, 222, 0.2) 0%, transparent 3%),
+                radial-gradient(circle at 40% 80%, rgba(90, 200, 250, 0.25) 0%, transparent 3%),
+                radial-gradient(circle at 70% 20%, rgba(255, 159, 10, 0.2) 0%, transparent 2%),
+                radial-gradient(circle at 30% 60%, rgba(0, 122, 255, 0.15) 0%, transparent 4%);
+            animation: particleFloat 20s infinite linear;
+            pointer-events: none;
+        }
+
+        /* Theme-specific scan line effects */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            pointer-events: none;
+            z-index: 1;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Default scan line (Earth theme) */
+        .hero::after,
+        .hero-scanline {
+            position: absolute;
+            top: -100%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            pointer-events: none;
+            z-index: 3;
+            background: linear-gradient(90deg, transparent, rgba(90, 200, 250, 0.9), rgba(255, 255, 255, 0.6), rgba(90, 200, 250, 0.9), transparent);
+            animation: earthScan 4s infinite ease-in-out;
+            box-shadow: 0 0 10px rgba(90, 200, 250, 0.6);
+        }
+
+        @keyframes particleFloat {
+            0% { 
+                transform: translate(0, 0) rotate(0deg); 
+                opacity: 0.7;
+            }
+            33% { 
+                transform: translate(30px, -30px) rotate(120deg); 
+                opacity: 0.4;
+            }
+            66% { 
+                transform: translate(-20px, 20px) rotate(240deg); 
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translate(0, 0) rotate(360deg); 
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes earthScan {
+            0% { 
+                top: -10%; 
+                opacity: 0;
+                transform: scaleX(0.5);
+            }
+            50% { 
+                opacity: 1;
+                transform: scaleX(1);
+            }
+            100% { 
+                top: 110%; 
+                opacity: 0;
+                transform: scaleX(0.5);
+            }
+        }
+
+
+
+        /* Simplified grid overlay - Earth theme only */
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 1;
+            background-image: 
+                linear-gradient(rgba(90, 200, 250, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(90, 200, 250, 0.15) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: earthGrid 6s ease-in-out infinite alternate;
+        }
+
+        @keyframes earthGrid {
+            0% { opacity: 0.4; transform: scale(1); }
+            100% { opacity: 0.2; transform: scale(1.02); }
+        }
+
+
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 800;
+            color: white;
+            margin-bottom: 24px;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .hero-subtitle {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: clamp(24px, 4vw, 40px);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 32px;
+            line-height: 1.3;
+            animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            line-height: 1.6;
+            animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: rgba(0, 122, 255, 1);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: var(--blur-background);
+            -webkit-backdrop-filter: var(--blur-background);
+            box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary:hover {
+            background: white;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(90, 200, 250, 0.3), 0 0 20px rgba(90, 200, 250, 0.2);
+            color: rgba(0, 122, 255, 1);
+        }
+
+        .btn-secondary {
+            background: rgba(90, 200, 250, 0.15);
+            color: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(90, 200, 250, 0.4);
+            padding: 16px 32px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: var(--blur-background);
+            -webkit-backdrop-filter: var(--blur-background);
+            box-shadow: 0 2px 8px rgba(90, 200, 250, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(90, 200, 250, 0.25);
+            border-color: rgba(90, 200, 250, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(90, 200, 250, 0.2), 0 0 20px rgba(90, 200, 250, 0.1);
+            color: white;
+        }
+
+        /* Globe Container - Floating card */
+        .globe-container {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 300px;
+            height: 300px;
+            border-radius: 32px;
+            background: var(--glass-background);
+            backdrop-filter: var(--blur-glass);
+            -webkit-backdrop-filter: var(--blur-glass);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-large);
+            overflow: hidden;
+            z-index: 100;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .globe-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        #cesiumContainer {
+            width: 100%;
+            height: 100%;
+            border-radius: 32px;
+        }
+
+        /* Features Section - Cards with glassmorphism */
+        .features {
+            padding: 120px 24px;
+            background: var(--background-secondary);
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            background: var(--background-primary);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--system-gray-2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-large);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .feature-title {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Gameplay Loop - Timeline design */
+        .gameplay-loop {
+            padding: 120px 24px;
+            background: var(--background-primary);
+        }
+
+        .loop-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .loop-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
+            margin-top: 60px;
+        }
+
+        .loop-step {
+            text-align: center;
+            padding: 32px 24px;
+            background: var(--background-secondary);
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--system-gray-2);
+        }
+
+        .loop-step:hover {
+            background: linear-gradient(135deg, rgba(90, 200, 250, 0.95) 0%, rgba(0, 122, 255, 0.9) 100%);
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(90, 200, 250, 0.3);
+        }
+
+        .step-number {
+            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(90, 200, 250, 1) 0%, rgba(0, 122, 255, 1) 100%);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(90, 200, 250, 0.3);
+        }
+
+        .loop-step:hover .step-number {
+            background: white;
+            color: rgba(0, 122, 255, 1);
+            box-shadow: 0 4px 12px rgba(90, 200, 250, 0.4);
+        }
+
+        .step-title {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .loop-step:hover .step-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Final CTA - Minimal and clean */
+        .final-cta {
+            padding: 120px 24px;
+            background: var(--gradient-hero);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        }
+
+        .cta-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-title {
+            font-family: 'SF Pro Display', sans-serif;
+            font-size: clamp(40px, 6vw, 64px);
+            font-weight: 700;
+            color: white;
+            margin-bottom: 24px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-description {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 48px;
+            line-height: 1.5;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Footer - Minimal */
+        footer {
+            background: var(--background-secondary);
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: rgba(90, 200, 250, 1);
+        }
+
+        .copyright {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Interactive mouse effects */
+        .hero::before {
+            transform: translate(var(--mouse-x, 0), var(--mouse-y, 0));
+        }
+
+        .hero-container {
+            transform: translate(calc(var(--mouse-x, 0) * 0.5), calc(var(--mouse-y, 0) * 0.5));
+        }
+
+        /* Enhanced visual effects for NASA Earth background */
+        .hero-background {
+            background-attachment: fixed;
+            filter: contrast(1.1) saturate(1.2);
+            background-blend-mode: overlay;
+        }
+
+        /* Simplified particle system - Earth theme only */
+        .particle-system {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(90, 200, 250, 0.9) 0%, transparent 70%);
+            box-shadow: 0 0 10px rgba(90, 200, 250, 0.5);
+            animation: particleDrift 15s infinite linear;
+        }
+
+        @keyframes particleDrift {
+            0% {
+                transform: translate(-100vw, 100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(100vw, -100vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+
+
+        /* Enhanced glow effects */
+        .hero-title {
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .hero-subtitle {
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            nav {
+                top: 16px;
+                padding: 8px 16px;
+            }
+
+            .hero {
+                padding: 120px 0 80px;
+            }
+
+            .globe-container {
+                position: static;
+                width: 100%;
+                max-width: 300px;
+                height: 300px;
+                margin: 40px auto 0;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .loop-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                min-width: 200px;
+            }
+
+            .hero-background {
+                background-attachment: scroll;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-primary: #000000;
+                --background-secondary: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #EBEBF5;
+                --text-tertiary: #8E8E93;
+                --system-gray: #1C1C1E;
+                --system-gray-2: #2C2C2E;
+            }
+
+            .feature-card {
+                background: var(--background-secondary);
+                border-color: #2C2C2E;
+            }
+
+            .feature-card:hover {
+                background: rgba(28, 28, 30, 0.95);
+            }
+        }
+
+        /* Smooth interactions */
+        * {
+            transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--system-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">COALITIONS</div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#gameplay">Experience</a></li>
+                <li><a href="game.html">Launch</a></li>
+            </ul>
+            <a href="game.html" class="cta-nav">Play Now</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <!-- Dynamic background layers -->
+        <div class="hero-background bg-earth" id="heroBg"></div>
+        <div class="grid-overlay"></div>
+        
+        <div class="hero-container">
+            <h1 class="hero-title">Command the Future</h1>
+            <p class="hero-subtitle">Real-time global strategy</p>
+            <p class="hero-description">
+                Experience the most advanced military simulation ever created. Command forces across a living 3D world where every decision shapes tomorrow's conflicts.
+            </p>
+            <div class="hero-cta">
+                <a href="game.html" class="btn-primary">Launch Experience</a>
+                <a href="#features" class="btn-secondary">Explore Features</a>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- Floating Globe -->
+    <div class="globe-container">
+        <div id="cesiumContainer">
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 16px;">
+                🌍 Interactive Globe
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="features-container">
+            <div class="section-header">
+                <h2 class="section-title">Revolutionary Strategy</h2>
+                <p class="section-subtitle">Built on cutting-edge 3D technology with unprecedented realism and precision</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🌍</span>
+                    <h3 class="feature-title">Living 3D World</h3>
+                    <p class="feature-description">Seamless zoom from satellite to street level. Built on professional-grade Cesium technology with sub-meter precision.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 class="feature-title">Real-time Simulation</h3>
+                    <p class="feature-description">Every action ripples across interconnected economic and military systems in real-time global simulation.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3 class="feature-title">Modern Warfare</h3>
+                    <p class="feature-description">From cyber operations to space conflicts. Every domain of 21st-century warfare authentically simulated.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🧠</span>
+                    <h3 class="feature-title">AI-Driven Events</h3>
+                    <p class="feature-description">Dynamic narratives emerge from system interactions. No scripted scenarios, only emergent storytelling.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🔗</span>
+                    <h3 class="feature-title">Integrated Systems</h3>
+                    <p class="feature-description">Military actions affect global markets. Economic decisions shape diplomatic relations. Everything connected.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">👥</span>
+                    <h3 class="feature-title">Multiplayer Command</h3>
+                    <p class="feature-description">Coordinate with allies in persistent global campaigns. Asynchronous turns with real-time collaboration.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gameplay Loop -->
+    <section id="gameplay" class="gameplay-loop">
+        <div class="loop-container">
+            <div class="section-header">
+                <h2 class="section-title">The Command Cycle</h2>
+                <p class="section-subtitle">Every decision triggers immediate global consequences</p>
+            </div>
+            <div class="loop-steps">
+                <div class="loop-step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Assess</h3>
+                    <p class="step-description">Scan global intelligence feeds</p>
+                </div>
+                <div class="loop-step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Decide</h3>
+                    <p class="step-description">Allocate resources strategically</p>
+                </div>
+                <div class="loop-step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Execute</h3>
+                    <p class="step-description">Deploy forces and assets</p>
+                </div>
+                <div class="loop-step">
+                    <div class="step-number">4</div>
+                    <h3 class="step-title">Adapt</h3>
+                    <p class="step-description">Respond to global changes</p>
+                </div>
+                <div class="loop-step">
+                    <div class="step-number">5</div>
+                    <h3 class="step-title">Evolve</h3>
+                    <p class="step-description">Advance capabilities</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <div class="cta-container">
+            <h2 class="cta-title">Shape Tomorrow</h2>
+            <p class="cta-description">
+                Join the evolution of strategic gaming. Command with unprecedented precision.
+            </p>
+            <div class="cta-buttons">
+                <a href="game.html" class="btn-primary">Begin Mission</a>
+                <a href="mailto:command@coalitions.com" class="btn-secondary">Request Access</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="#privacy">Privacy</a>
+                <a href="#terms">Terms</a>
+                <a href="#support">Support</a>
+                <a href="#careers">Careers</a>
+            </div>
+            <div class="copyright">
+                © 2024 Coalitions. Built with Cesium 3D Technology.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Cesium -->
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🍎 Modern Coalitions Landing Page Loading...');
+            
+            // Simplified NASA Earth background only
+            console.log('🌍 NASA Earth background initialized');
+
+            // Smooth parallax effect for hero
+            let lastScrollY = 0;
+            const heroElement = document.querySelector('.hero');
+            const heroBg = document.querySelector('.hero-background');
+            
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                const rate = scrollY * -0.3;
+                
+                if (heroElement && scrollY < window.innerHeight) {
+                    heroElement.style.transform = `translateY(${rate}px)`;
+                }
+                
+                // Parallax for background
+                if (heroBg) {
+                    heroBg.style.transform = `translateY(${scrollY * -0.5}px) scale(1.1)`;
+                }
+                
+                lastScrollY = scrollY;
+            });
+
+            // Add some interactive particle effects on mouse move
+            let mouseX = 0, mouseY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX - window.innerWidth / 2) / window.innerWidth;
+                mouseY = (e.clientY - window.innerHeight / 2) / window.innerHeight;
+                
+                if (heroElement) {
+                    heroElement.style.setProperty('--mouse-x', mouseX * 20 + 'px');
+                    heroElement.style.setProperty('--mouse-y', mouseY * 20 + 'px');
+                }
+            });
+
+            // Dynamic particle system
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle-system';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                heroElement.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 25000);
+            }
+
+            // Create particles periodically
+            setInterval(createParticle, 3000);
+            
+            // Create initial particles
+            for (let i = 0; i < 5; i++) {
+                setTimeout(createParticle, i * 1000);
+            }
+
+            // Test NASA image loading and fallback
+            const testImg = new Image();
+            testImg.onload = () => {
+                console.log('✅ NASA Earth image loaded successfully');
+            };
+            testImg.onerror = () => {
+                console.log('⚠️ NASA image failed, using fallback gradients');
+                if (heroBg) {
+                    heroBg.classList.add('bg-earth-fallback');
+                }
+            };
+            testImg.src = 'https://images-assets.nasa.gov/image/PIA18033/PIA18033~large.jpg';
+
+            // Initialize Cesium globe if available
+            if (typeof Cesium !== 'undefined') {
+                try {
+                    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI5N2ZiZGE5NC1lMGZkLTQzYjktODQ0OS1jZGFkMjk0MzBkZjMiLCJpZCI6MjQzNTUsImlhdCI6MTcwMzI4OTk0OH0.8grHu8WPOr3bj1ALd32ZTVwHkl6t5WlcVvDSbKhsU8s';
+                    if (token) {
+                        Cesium.Ion.defaultAccessToken = token;
+                    }
+                    
+                    const viewer = new Cesium.Viewer('cesiumContainer', {
+                        timeline: false,
+                        animation: false,
+                        baseLayerPicker: false,
+                        fullscreenButton: false,
+                        homeButton: false,
+                        sceneModePicker: false,
+                        geocoder: false,
+                        navigationHelpButton: false,
+                        vrButton: false,
+                        terrain: Cesium.Terrain.fromWorldTerrain(),
+                        requestRenderMode: true,
+                        maximumRenderTimeChange: Infinity
+                    });
+
+                    // Minimal, clean markers
+                    const locations = [
+                        { lon: -77.04, lat: 38.89, name: "DC" },
+                        { lon: 139.69, lat: 35.68, name: "Tokyo" },
+                        { lon: -0.12, lat: 51.50, name: "London" },
+                        { lon: 2.35, lat: 48.86, name: "Paris" }
+                    ];
+
+                    locations.forEach(loc => {
+                        viewer.entities.add({
+                            position: Cesium.Cartesian3.fromDegrees(loc.lon, loc.lat),
+                            point: {
+                                pixelSize: 8,
+                                color: Cesium.Color.fromCssColorString('#007AFF'),
+                                outlineColor: Cesium.Color.WHITE,
+                                outlineWidth: 2,
+                                scaleByDistance: new Cesium.NearFarScalar(1000000, 1.0, 10000000, 0.3)
+                            }
+                        });
+                    });
+
+                    // Set clean view
+                    viewer.scene.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(0, 20, 20000000),
+                        orientation: {
+                            heading: 0,
+                            pitch: -Math.PI / 6,
+                            roll: 0
+                        }
+                    });
+
+                    // Subtle rotation
+                    viewer.clock.onTick.addEventListener(() => {
+                        viewer.scene.camera.rotate(Cesium.Cartesian3.UNIT_Z, -0.01 / 60);
+                    });
+
+                    console.log('✅ Globe initialized with Apple-style minimalism');
+
+                } catch (error) {
+                    console.error('❌ Globe initialization failed:', error);
+                    document.getElementById('cesiumContainer').innerHTML = 
+                        '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #8E8E93; font-size: 16px;">🌍 Globe Loading...</div>';
+                }
+            }
+
+            // Smooth scrolling for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+
+            // Intersection Observer for animations
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Observe feature cards
+            document.querySelectorAll('.feature-card, .loop-step').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+
+            console.log('🍎 Apple-inspired fluid design loaded successfully');
+        });
+    </script>
+  </body>
+</html>
